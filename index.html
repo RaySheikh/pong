@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Pong</title>
+  </head>
+  <body>
+    <h2 width="800">Pong</h2>
+    <canvas id="canvas" height="500" width="800"></canvas>
+  </body>
+  <script>
+    var canvas;
+    var context;
+    var ballX = 400;
+    var ballY = 250;
+    var ballSpeedX = getBallSpeedX();
+    var ballSpeedY = getRandom();
+
+    const WINNING_SCORE = 5;
+    var player1Scroe = 0;
+    var player2Score = 0;
+
+    var winner = null;
+
+    var paddle1Y = 250;
+    var paddle2Y = 250;
+    var paddleBottom;
+    var paddleTop;
+    const PADDLE_HEIGHT = 80;
+
+    window.onload = () => {
+      canvas = document.getElementById("canvas");
+      context = canvas.getContext("2d");
+      var fps = 30;
+      setInterval(() => {
+        drawBoard();
+      }, 1000 / fps);
+      canvas.addEventListener("mousedown", continueClick);
+      canvas.addEventListener("mousemove", function (evt) {
+        var mousePos = calculateMousePos(evt);
+        paddle1Y = mousePos.y - PADDLE_HEIGHT / 2;
+        paddleTop = paddle1Y;
+        paddleBottom = paddle1Y + PADDLE_HEIGHT;
+      });
+    };
+    function continueClick(evt) {
+      if (winner) {
+        player1Scroe = 0;
+        player2Score = 0;
+        winner = null;
+      }
+    }
+    function animateBall() {
+      ballSpeedX = getBallSpeedX();
+      ballSpeedY = getRandom();
+    }
+    function resetBall() {
+      ballX = 400;
+      ballY = 250;
+      ballSpeedX = 0;
+      ballSpeedY = 0;
+    }
+    function calculateMousePos(evt) {
+      var rect = canvas.getBoundingClientRect();
+      var root = document.documentElement;
+      var mouseX = evt.clientX - rect.left - root.scrollLeft;
+      var mouseY = evt.clientY - rect.top - root.scrollTop;
+      return {
+        x: mouseX,
+        y: mouseY,
+      };
+    }
+    function drawBoard() {
+      context.fillStyle = "black";
+      context.fillRect(0, 0, canvas.width, canvas.height);
+      context.fillStyle = "white";
+      context.font = "18px 'Segoe UI'";
+      animateCanvas();
+      context.fillText(player1Scroe, 100, 100);
+      context.fillText(player2Score, canvas.width - 100, 100);
+      if (winner) {
+        context.fillText(winner, canvas.width / 2 - 50, 100);
+        context.fillText(
+          "Click to play again",
+          canvas.width / 2 - 75,
+          canvas.height - 100
+        );
+        return;
+      }
+      drawBall();
+      drawPaddles();
+    }
+    function drawPaddles() {
+      //p1 paddle
+      colorRect(0, paddle1Y, 10, PADDLE_HEIGHT, "white");
+
+      //p2 paddle
+      colorRect(790, paddle2Y, 10, PADDLE_HEIGHT, "white");
+    }
+    function colorRect(leftX, topY, width, height, color) {
+      context.fillStyle = color;
+      context.fillRect(leftX, topY, width, height);
+    }
+    function aiMovement() {
+      var paddle2YCenter = paddle2Y + PADDLE_HEIGHT / 2;
+      if (paddle2YCenter < ballY - 35) {
+        paddle2Y += 8;
+      } else if (paddle2YCenter > ballY + 35) {
+        paddle2Y -= 8;
+      }
+    }
+    function animateCanvas() {
+      if (player1Scroe === WINNING_SCORE || player2Score === WINNING_SCORE) {
+        winner = player1Scroe > player2Score ? "You won!!" : "You lost!";
+      }
+      if (ballSpeedX === 0 && ballSpeedY === 0 && !winner) {
+        wait(1000);
+        animateBall();
+      }
+      aiMovement();
+      ballX += ballSpeedX;
+      ballY += ballSpeedY;
+
+      if (ballX < 0) {
+        if (ballY > paddle1Y && ballY < paddleBottom) {
+          ballSpeedX = -ballSpeedX;
+          var deltaY = ballY - (paddle1Y + PADDLE_HEIGHT / 2);
+          ballSpeedY = deltaY * 0.35;
+        } else {
+          player2Score++;
+          resetBall();
+        }
+      }
+      if (ballX > canvas.width) {
+        if (ballY > paddle2Y && ballY < paddle2Y + PADDLE_HEIGHT) {
+          ballSpeedX = -ballSpeedX;
+          var deltaY = ballY - (paddle2Y + PADDLE_HEIGHT / 2);
+          ballSpeedY = deltaY * 0.35;
+        } else {
+          player1Scroe++;
+          resetBall();
+        }
+      }
+      if (ballY > canvas.height) {
+        ballSpeedY = -ballSpeedY;
+      }
+      if (ballY < 0) {
+        ballSpeedY = -ballSpeedY;
+      }
+    }
+    function drawBall() {
+      const radius = 10;
+
+      context.beginPath();
+      context.arc(ballX, ballY, radius, 0, 2 * Math.PI, false);
+      context.fillStyle = "white";
+      context.fill();
+      context.closePath();
+    }
+
+    function wait(ms) {
+      var start = new Date().getTime();
+      var end = start;
+      while (end < start + ms) {
+        end = new Date().getTime();
+      }
+    }
+
+    function getRandom() {
+      var ranNum =
+        Math.ceil(Math.random() * 4) * (Math.round(Math.random()) ? 1 : -1);
+      return ranNum;
+    }
+    function getBallSpeedX() {
+      return 10;
+    }
+  </script>
+  <style>
+    body {
+    }
+  </style>
+</html>
