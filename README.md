@@ -18,7 +18,7 @@ This is a simple implementation of the classic Pong game using HTML5 Canvas. You
 
 ## Live Demo
 
-You can play the game [here](#) (replace this with your actual link).
+You can play the game [here](https://raysheikh.github.io/pong/) (replace this with your actual link).
 
 ## Setup
 
